@@ -1,10 +1,44 @@
-# ?? Supabase Integration
-from supabase import create_client
+# 🚀 Supabase Integration - Secure & Reliable
 
-url = "https://your-project.supabase.co"
-key = "your-supabase-key"
-supabase = create_client(url, key)
+import os
+import logging
+from supabase import create_client, Client
 
-def store_payload(table, data):
-    response = supabase.table(table).insert(data).execute()
-    return response
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [Supabase] %(message)s")
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://your-project.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "your-supabase-key")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    logging.error("Supabase credentials not set in environment variables!")
+    supabase = None
+else:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    logging.info("Supabase client initialized.")
+
+def store_payload(table: str, data: dict):
+    if not supabase:
+        logging.error("Supabase client not initialized.")
+        return None
+    if not isinstance(data, dict):
+        logging.error("Payload data must be a dictionary.")
+        return None
+    try:
+        response = supabase.table(table).insert(data).execute()
+        logging.info(f"Payload stored in '{table}': {data}")
+        return response
+    except Exception as e:
+        logging.error(f"Failed to store payload: {e}")
+        return None
+
+def store_platform_to_db(platform):
+    if not supabase:
+        logging.error("Supabase client not initialized.")
+        return None
+    try:
+        response = supabase.table("platforms").insert(platform).execute()
+        logging.info(f"Platform stored in DB: {platform['name']}")
+        return response
+    except Exception as e:
+        logging.error(f"Failed to store platform: {e}")
+        return None
