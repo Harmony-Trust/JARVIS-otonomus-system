@@ -1,64 +1,62 @@
+# 🤖 JARVIS Signup Bot v2050 - Multi-Platform & Multi-Account Automation
+
 import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from integrations.platforms.platform_data import load_platforms
+from integrations.platforms.platforms_data import load_platforms
+from auth import get_credentials
+from audit_log import log_event
 import threading
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [SignupBot] %(message)s")
 
-def signup_platform(platform):
+def signup_platform(platform, account_id):
     try:
+        creds = get_credentials(account_id)
+        if not creds:
+            logging.warning(f"⚠️ Kredensial tidak ditemukan: {account_id}")
+            return
+
         options = Options()
         options.add_argument("--headless")
         driver = webdriver.Chrome(options=options)
         driver.get(platform["signup_url"])
-        # Simulasi pengisian form signup (harus disesuaikan tiap platform)
-        # driver.find_element(By.NAME, "email").send_keys("your_email")
-        # driver.find_element(By.NAME, "password").send_keys("your_password")
+
+        # Simulasi pengisian form signup (disesuaikan per platform)
+        # driver.find_element(By.NAME, "email").send_keys(creds["email"])
+        # driver.find_element(By.NAME, "password").send_keys(creds["password"])
         # driver.find_element(By.XPATH, "//button[@type='submit']").click()
-        logging.info(f"Signup success for {platform['name']}")
+
+        logging.info(f"✅ Signup berhasil: {platform['name']} - {account_id}")
+        log_event("signup_bot", "signup_success", {
+            "platform": platform["name"],
+            "account_id": account_id
+        })
+
         driver.quit()
-        return True
     except Exception as e:
-        logging.error(f"Signup failed for {platform['name']}: {e}")
-        return False
+        logging.error(f"❌ Signup gagal: {platform['name']} - {account_id} | {e}")
+        log_event("signup_bot", "signup_failed", {
+            "platform": platform["name"],
+            "account_id": account_id,
+            "error": str(e)
+        })
 
-def autosignup_all():
-    platforms = load_platforms()
-    for platform in platforms:
-        success = signup_platform(platform)
-        if not success:
-            logging.warning(f"Retrying signup for {platform['name']}")
-            # Bisa tambahkan retry logic di sini
-
-def autonomous_signup():
+def start_signup():
     platforms = load_platforms()
     threads = []
-    for platform in platforms:
-        if platform["status"] != "✅ Terdaftar":
-            t = threading.Thread(target=signup_platform, args=(platform,))
+
+    for p in platforms:
+        for account_id in p.get("accounts", []):
+            t = threading.Thread(target=signup_platform, args=(p, account_id))
             threads.append(t)
             t.start()
+
     for t in threads:
         t.join()
-    # ...simpan update ke file...
+
+    logging.info("🚀 Semua proses signup selesai.")
 
 if __name__ == "__main__":
-    autosignup_all()
-
-platforms_data = [
-    {
-        "name": "facebook",
-        "signup_url": "https://facebook.com/signup",
-        "quota": 10,
-        "policy": {"max_length": 500, "allowed_types": ["text", "image"]}
-    },
-    {
-        "name": "twitter",
-        "signup_url": "https://twitter.com/i/flow/signup",
-        "quota": 15,
-        "policy": {"max_length": 280, "allowed_types": ["text"]}
-    }
-    # ...hingga 1000 platform...
-]
+    start_signup()

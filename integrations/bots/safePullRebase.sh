@@ -1,4 +1,3 @@
-safePullRebase.sh
 #!/bin/bash
 
 set -e
@@ -14,7 +13,7 @@ if [ -f .git/index.lock ]; then
   rm -f .git/index.lock
 fi
 
-# Cek perubahan
+# Cek perubahan lokal
 CHANGES=$(git status --porcelain)
 if [ -n "$CHANGES" ]; then
   echo "🔍 Ada perubahan lokal."
@@ -40,7 +39,7 @@ if git pull --rebase origin main; then
   echo "✅ Pull & rebase berhasil!"
 else
   echo "❌ Terjadi masalah saat rebase. Menyimpan log..."
-  cp .git/rebase-apply/patch ./rebase-error.patch
+  cp .git/rebase-apply/patch ./rebase-error.patch || echo "⚠️ Tidak ada patch yang bisa disimpan."
 fi
 
 # Kembalikan stash jika perlu

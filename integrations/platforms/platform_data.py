@@ -1,10 +1,12 @@
+# 🌐 JARVIS Platform Loader v2050 - Multi-Platform Data Enricher
+
 import json
 import logging
 
 DEFAULT_QUOTA = 10
 DEFAULT_POLICY = {
     "max_length": 500,
-    "allowed_types": ["text"]
+    "allowed_types": ["text", "video", "image"]
 }
 DEFAULT_STATUS = "❌ Belum daftar"
 
@@ -12,7 +14,7 @@ def validate_platform(item):
     required = ["name", "signup_url", "category"]
     for key in required:
         if key not in item or not item[key]:
-            logging.warning(f"Platform missing '{key}': {item}")
+            logging.warning(f"⚠️ Platform missing '{key}': {item}")
             return False
     return True
 
@@ -26,6 +28,7 @@ def enrich_platform(p):
     p.setdefault("signup_attempts", 0)
     p.setdefault("distribute_count", 0)
     p.setdefault("error_count", 0)
+    p.setdefault("accounts", [])  # 🧠 Multi-akun per platform
     return p
 
 def load_platforms(path="platforms.json"):
@@ -41,8 +44,5 @@ def load_platforms(path="platforms.json"):
             logging.warning(f"{len(platforms) - len(valid_platforms)} invalid platforms skipped.")
         return valid_platforms
     except Exception as e:
-        logging.error(f"Failed to load platforms: {e}")
+        logging.error(f"❌ Gagal load platform: {e}")
         return []
-
-# File ini hanya untuk data platform nyata dan aksi produksi.
-# Semua pipeline signup, distribusi, dan monitoring gunakan load_platforms().

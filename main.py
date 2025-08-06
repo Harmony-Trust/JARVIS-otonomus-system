@@ -1,7 +1,11 @@
+# 📦 JARVIS Bootstrap v2050
+# Tujuan: Menginisialisasi sistem JARVIS dengan proteksi, logging, dan modularisasi
+
 import os
 import sys
 import importlib
 import logging
+import traceback
 
 # === Logging Setup ===
 logging.basicConfig(
@@ -31,9 +35,10 @@ for folder in [CONTROL_DIR, HARMONY_DIR, AGENT_DIR]:
 try:
     from harmony_core import start_harmony
     start_harmony()
-    logging.info("Harmony Engine started.")
+    logging.info("🎼 Harmony Engine started.")
 except Exception as e:
-    logging.error(f"Harmony Engine Error: {e}")
+    logging.error(f"❌ Harmony Engine Error: {e}")
+    logging.debug(traceback.format_exc())
 
 # === Load All Agents Automatically ===
 def load_agents(agent_folder):
@@ -44,40 +49,41 @@ def load_agents(agent_folder):
                 module = importlib.import_module(module_name)
                 if hasattr(module, 'start_agent'):
                     module.start_agent()
-                    logging.info(f"Agent '{module_name}' started.")
+                    logging.info(f"🤖 Agent '{module_name}' started.")
             except Exception as err:
-                logging.error(f"Agent '{module_name}' failed: {err}")
+                logging.error(f"❌ Agent '{module_name}' failed: {err}")
+                logging.debug(traceback.format_exc())
 
 load_agents(AGENT_DIR)
 
 # === Supabase & ENV Setup ===
 try:
     from integrations.supabase.supabase_client import store_payload
-    # Cek environment variable untuk keamanan
     supabase_url = os.getenv("SUPABASE_URL")
     supabase_key = os.getenv("SUPABASE_KEY")
     if not supabase_url or not supabase_key:
-        logging.warning("Supabase credentials not set in environment variables.")
+        logging.warning("⚠️ Supabase credentials not set.")
     else:
-        logging.info("Supabase client ready.")
+        logging.info("🛠️ Supabase client ready.")
 except Exception as e:
-    logging.error(f"Supabase client error: {e}")
+    logging.error(f"❌ Supabase client error: {e}")
+    logging.debug(traceback.format_exc())
 
-# === Optional: Voice Interface (future-ready) ===
+# === Optional: Voice Interface ===
 try:
     from voice_listener import init_listener
     init_listener()
-    logging.info("Voice listener active.")
+    logging.info("🎙️ Voice listener active.")
 except Exception as e:
-    logging.info("Voice listener not active.")
+    logging.info("🔕 Voice listener not active.")
 
 # === Optional: CLI Command Interface ===
 try:
     from harmony_cli import cli_loop
     cli_loop()
-    logging.info("CLI loop initiated.")
+    logging.info("🧭 CLI loop initiated.")
 except Exception as e:
-    logging.info("CLI loop not initiated.")
+    logging.info("🧭 CLI loop not initiated.")
 
 # === Optional: Momentum Engine & Campaign Push ===
 try:
@@ -85,8 +91,8 @@ try:
     init_momentum()
     from campaign_pusher import run_push_cycle
     run_push_cycle()
-    logging.info("Distribution modules enabled.")
+    logging.info("📡 Distribution modules enabled.")
 except Exception as e:
-    logging.info("Distribution modules not yet enabled.")
+    logging.info("📡 Distribution modules not yet enabled.")
 
 print("\n✨ JARVIS Bootstrap Selesai. Sistem siap digerakkan!\n")

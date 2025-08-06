@@ -1,18 +1,27 @@
-# 🚀 Harmony Control Core - Ultra Orchestration Engine
+# 🚀 JARVIS Module: Harmony Control Core v2050
+# Tujuan: Orkestrasi modul harmoni dengan proteksi konfigurasi, introspeksi, dan event loop
 
 import os
 import importlib
 import logging
+import traceback
+import yaml
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "harmony_config.yaml")
 
 def load_config():
     if os.path.exists(CONFIG_PATH):
-        import yaml
-        with open(CONFIG_PATH, "r") as f:
-            return yaml.safe_load(f)
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                config = yaml.safe_load(f)
+                logging.info("✅ Config berhasil dimuat.")
+                return config
+        except Exception as e:
+            logging.error(f"❌ Gagal membaca config: {e}")
+            logging.debug(traceback.format_exc())
+            return {}
     else:
-        logging.warning("Config file not found, using default config.")
+        logging.warning("⚠️ Config file tidak ditemukan, menggunakan default.")
         return {}
 
 def discover_modules(folder):
@@ -22,33 +31,32 @@ def discover_modules(folder):
             modules.append(fname[:-3])
     return modules
 
-def connect_modules(modules, folder):
+def connect_modules(modules, namespace="control.harmony"):
     for mod_name in modules:
         try:
-            mod = importlib.import_module(mod_name)
+            full_path = f"{namespace}.{mod_name}"
+            mod = importlib.import_module(full_path)
             if hasattr(mod, "init_module"):
                 mod.init_module()
-                logging.info(f"Module '{mod_name}' connected.")
+                logging.info(f"🔗 Module '{mod_name}' connected.")
         except Exception as e:
-            logging.error(f"Module '{mod_name}' failed: {e}")
+            logging.error(f"❌ Module '{mod_name}' failed: {e}")
+            logging.debug(traceback.format_exc())
 
 def start_harmony():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [Harmony] %(message)s")
     print("🎼 Harmony orchestration initiated...")
 
     config = load_config()
-    logging.info(f"Config loaded: {config}")
+    logging.info(f"🧠 Config loaded: {config}")
 
-    # Discover and connect harmony modules
     harmony_folder = os.path.dirname(__file__)
     modules = discover_modules(harmony_folder)
-    connect_modules(modules, harmony_folder)
+    connect_modules(modules)
 
-    # Listen to system events (simple loop)
-    logging.info("Harmony is listening for system events...")
-    # Simulasi event loop sederhana
+    logging.info("🌀 Harmony is listening for system events...")
     for i in range(3):
-        logging.info(f"Event tick {i+1} - system stable.")
+        logging.info(f"🕒 Event tick {i+1} - system stable.")
 
-    logging.info("Harmony orchestration complete.")
+    logging.info("✅ Harmony orchestration complete.")
     return "Ready"
