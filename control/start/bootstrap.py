@@ -19,6 +19,7 @@ def main():
     elapsed = time.time() - start_time
     logging.info(f"⏱️ Bootstrap selesai dalam {elapsed:.2f} detik.")
     print(f"\n✨ JARVIS Bootstrap Selesai. Status: {status}\n")
+    print(f"System status: {status}")  # Tambahan dari versi lama
 
 if __name__ == "__main__":
     main()

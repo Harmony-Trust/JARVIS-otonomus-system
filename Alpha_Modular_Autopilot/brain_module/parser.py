@@ -1,5 +1,5 @@
 # 📦 JARVIS Module: Parsey v2050
-# Tujuan: Orkestrasi agent dan integrasi dengan logging, introspeksi, dan modularisasi
+# Tujuan: Orkestrasi agent, integrasi Supabase, dan parsing input NLP
 
 import os
 import sys
@@ -52,4 +52,9 @@ except Exception as e:
     logging.error(f"❌ Supabase client error: {e}")
     logging.debug(traceback.format_exc())
 
-print("\n🔍 Parsey selesai mengorkestrasi agent dan integrasi.\n")
+# === NLP Parser Core ===
+def parse_input(text):
+    # TODO: Improve NLP & intent parsing
+    return {"intent": "auto_dispatch", "content": text}
+
+print("\n🔍 Parsey selesai mengorkestrasi agent, integrasi Supabase, dan parser NLP.\n")
